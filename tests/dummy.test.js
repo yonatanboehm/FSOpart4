@@ -114,7 +114,7 @@ describe('most likes', () => {
       url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
       likes: 2,
       __v: 0
-    }  
+    } 
   ]
 
   test('find the blog with most likes', () => {
@@ -123,6 +123,14 @@ describe('most likes', () => {
       title: "Canonical string reduction",
       author: "Edsger W. Dijkstra",
       likes: 12
+    })
+  })
+
+  test('most published author', () => {
+    const result = listHelper.authorMostBlogs(blogs)
+    expect(result).toEqual({
+      author: "Robert C. Martin",
+      blogs: 3
     })
   })
 })
