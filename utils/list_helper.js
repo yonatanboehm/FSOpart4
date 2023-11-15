@@ -8,7 +8,7 @@ const totalLikes = (blogs) => {
   return likesArr.reduce((x,y) => x+y, 0)
 }
 
-const mostLikes = (blogs) => {
+const favoriteBlog = (blogs) => {
   const likesCount = Math.max(...blogs.map(blog => blog.likes))
   const mostLikedBlog = blogs.find(blog => blog.likes === likesCount)
   return {
@@ -19,7 +19,7 @@ const mostLikes = (blogs) => {
   
 }
 
-const authorMostBlogs = (blogs) => {
+const mostBlogs = (blogs) => {
   const blogsByAuthor = _.countBy(blogs.map(blog => blog.author)) // count occurances of authors in author array // return author name with maximum value
   mostBlogs = Math.max(...Object.values(blogsByAuthor))
   authorMax = Object.keys(blogsByAuthor).find(author => blogsByAuthor[author] === mostBlogs)
@@ -29,6 +29,18 @@ const authorMostBlogs = (blogs) => {
   }
 }
 
+const mostLikes = (blogs) => {
+  const likesByAuthor = _(blogs)
+    .groupBy('author')
+    .map((blog, author) => ({
+      author: author,
+      likes : _.sumBy(blog, 'likes')
+    }))
+    .value()
+  maxLikes = Math.max(...likesByAuthor.map(author => author.likes))
+  return likesByAuthor.find(author => author.likes === maxLikes)
+}
+
 module.exports = {
-  dummy, totalLikes, mostLikes, authorMostBlogs
+  dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes
 }
