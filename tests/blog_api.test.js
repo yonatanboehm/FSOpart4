@@ -23,7 +23,6 @@ test('blogs are returned as json', async () => {
 
 test('blogs id is defined', async () => {
   const response = await api.get('/api/blogs')
-  console.log(response)
   response.body.map(blog => expect(blog.id).toBeDefined())
 })
 
@@ -64,6 +63,26 @@ test('a blog with no like is assigned 0 likes', async () => {
 
   const addedBlog = await Blog.find({ title: 'My story'}) // returns list
   expect(addedBlog[0].likes).toBe(0)
+}, 100000)
+
+test('a blog without a title or url returns 400', async () => {
+  const noTitleBlog = {
+    author: "Barack Obama",
+    url: "https://barackobama.com"
+  }
+  const noUrlBlog = {
+    title: "My story",
+    author: "Barack Obama",
+  }
+  await api
+    .post('/api/blogs')
+    .send(noTitleBlog)
+    .expect(400)
+  
+  await api
+    .post('/api/blogs')
+    .send(noUrlBlog)
+    .expect(400)
 }, 100000)
 
 afterAll(async () => {
