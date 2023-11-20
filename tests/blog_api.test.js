@@ -49,6 +49,23 @@ test('a valid blog can be added', async () => {
   )
 }, 100000)
 
+test('a blog with no like is assigned 0 likes', async () => {
+  const newBlog = {
+    title: "My story",
+    author: "Barack Obama",
+    url: "https://barackobama.com"
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const addedBlog = await Blog.find({ title: 'My story'}) // returns list
+  expect(addedBlog[0].likes).toBe(0)
+}, 100000)
+
 afterAll(async () => {
   await mongoose.connection.close()
 }, 100000)
