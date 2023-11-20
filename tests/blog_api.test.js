@@ -26,64 +26,93 @@ test('blogs id is defined', async () => {
   response.body.map(blog => expect(blog.id).toBeDefined())
 })
 
-test('a valid blog can be added', async () => {
-  const newBlog = {
-    title: "Twitter shinanigans",
-    author: "Elon Musk",
-    url: "https://x.com"
-  }
+describe('altering blogs', () => {
+  test('deleting a blog', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd.length).toBe(helper.initialBlogs.length - 1)
 
-  const blogsAtEnd = await helper.blogsInDb()
-  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
-  
-  const titles = blogsAtEnd.map(b => b.title)
-  expect(titles).toContain(
-    'Twitter shinanigans'
-  )
-}, 100000)
+    const titles = blogsAtEnd.map(blog => blog.title)
+    expect(titles).not.toContain(blogToDelete.title)
+  }, 100000)
 
-test('a blog with no like is assigned 0 likes', async () => {
-  const newBlog = {
-    title: "My story",
-    author: "Barack Obama",
-    url: "https://barackobama.com"
-  }
+  test('updating likes in blog', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .expect(200)
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    const updatedBlog = await Blog.findById(blogToUpdate.id)
+    expect(updatedBlog.likes).toBe(blogToUpdate.likes + 1)
+  }, 100000)
+})
 
-  const addedBlog = await Blog.find({ title: 'My story'}) // returns list
-  expect(addedBlog[0].likes).toBe(0)
-}, 100000)
+describe('adding new blogs', () => { 
+  test('a valid blog can be added', async () => {
+    const newBlog = {
+      title: "Twitter shinanigans",
+      author: "Elon Musk",
+      url: "https://x.com"
+    }
 
-test('a blog without a title or url returns 400', async () => {
-  const noTitleBlog = {
-    author: "Barack Obama",
-    url: "https://barackobama.com"
-  }
-  const noUrlBlog = {
-    title: "My story",
-    author: "Barack Obama",
-  }
-  await api
-    .post('/api/blogs')
-    .send(noTitleBlog)
-    .expect(400)
-  
-  await api
-    .post('/api/blogs')
-    .send(noUrlBlog)
-    .expect(400)
-}, 100000)
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+    
+    const titles = blogsAtEnd.map(b => b.title)
+    expect(titles).toContain(
+      'Twitter shinanigans'
+    )
+  }, 100000)
+
+  test('a blog with no like is assigned 0 likes', async () => {
+    const newBlog = {
+      title: "My story",
+      author: "Barack Obama",
+      url: "https://barackobama.com"
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const addedBlog = await Blog.find({ title: 'My story'}) // returns list
+    expect(addedBlog[0].likes).toBe(0)
+  }, 100000)
+
+  test('a blog without a title or url returns 400', async () => {
+    const noTitleBlog = {
+      author: "Barack Obama",
+      url: "https://barackobama.com"
+    }
+    const noUrlBlog = {
+      title: "My story",
+      author: "Barack Obama",
+    }
+    await api
+      .post('/api/blogs')
+      .send(noTitleBlog)
+      .expect(400)
+    
+    await api
+      .post('/api/blogs')
+      .send(noUrlBlog)
+      .expect(400)
+  }, 100000)
+})
 
 afterAll(async () => {
   await mongoose.connection.close()
