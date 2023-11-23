@@ -12,8 +12,10 @@ blogsRouter.post('/', async (request, response) => {
     const body = request.body
 
     const users = await User.find({})
-    users.map(user => user.toJSON())
     const user = users[Math.floor(Math.random() * users.length)]
+
+    console.log(user)
+
     const blog = new Blog({
       url: body?.url,
       title: body?.title,
@@ -21,12 +23,14 @@ blogsRouter.post('/', async (request, response) => {
       user: user?.id,
       likes: body?.likes
     })
-    console.log(blog)
+
     if (!blog.likes){
         blog.likes = 0
     }
     if (blog.url && blog.title){
       const result = await blog.save()
+      user.blogs = user.blogs.concat(result._id)
+      await user.save()
       response.status(201).json(result)
     } else {
       response.status(400).end()

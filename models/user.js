@@ -13,7 +13,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 3,
     required: true,
-  }
+  },
+  blogs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Blog'
+    }
+  ],
 })
 
 userSchema.plugin(uniqueValidator)
@@ -23,8 +29,11 @@ userSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
-    // the passwordHash should not be revealed
     delete returnedObject.passwordHash
+    for (let blog of returnedObject?.blogs) {
+      delete blog.user
+      delete blog.id
+    }
   }
 })
 
