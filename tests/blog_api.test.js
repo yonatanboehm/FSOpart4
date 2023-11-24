@@ -119,6 +119,20 @@ describe('actions requiring authorization', () => {
       .expect(400)
   }, 100000)
 
+  test('a blog without a token', async () => {
+
+    const noTitleBlog = {
+      author: "Barack Obama",
+      url: "https://barackobama.com",
+      title: "My story"
+    }
+    await api
+      .post('/api/blogs')
+      .send(noTitleBlog)
+      .expect(401)
+  
+  }, 100000)
+
   test('deleting a blog', async () => {
     const newBlog = {
       title: "Twitter shinanigans",
